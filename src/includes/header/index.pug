@@ -1,4 +1,6 @@
-header
-    nav
-        a(href="/") Home
-        a(href="about.html") About
+- var css = require('./styles/index.pcss.json');
+
+header(class=css.header)
+    nav(class=css.nav)
+        a(href="/" class=css.item) Home
+        a(href="about.html" class=css.item) About

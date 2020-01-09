@@ -2,6 +2,8 @@ const path = require('path');
 const fs = require('fs');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
+const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+const glob = require('glob');
 
 function generateHtmlPlugins(templateDir) {
     const templateFiles = fs.readdirSync(path.resolve(__dirname, templateDir));
@@ -21,12 +23,13 @@ function generateHtmlPlugins(templateDir) {
 const htmlPlugins = generateHtmlPlugins('./src/pages');
 
 module.exports = {
-    entry: ['./src/index.js'],
+    entry: glob.sync('./src/**/*.js'),
     output: {
         filename: './js/bundle.js'
     },
     devtool: "source-map",
     devServer: {
+        contentBase: path.join(__dirname, 'dist'),
         port: 8001,
     },
     module: {
@@ -44,13 +47,11 @@ module.exports = {
             {
                 test: /\.pcss$/,
                 use: [
-                    {
-                        loader: 'style-loader'
-                    },
+                    'style-loader',
+                    MiniCssExtractPlugin.loader,
                     {
                         loader: 'css-loader',
                         options: {
-                            modules: true,
                             importLoaders: 1,
                         },
                     },
@@ -58,6 +59,10 @@ module.exports = {
                         loader: 'postcss-loader',
                     }
                 ],
+            },
+            {
+                test: /\.jpe?g$|\.gif$|\.png$|\.svg$/,
+                use: 'file-loader'
             },
             {
                 test: /\.pug$/,
@@ -68,6 +73,9 @@ module.exports = {
         ]
     },
     plugins: [
+        new MiniCssExtractPlugin({
+            filename: 'style.[contenthash].css',
+        }),
         new CopyWebpackPlugin([
             {
                 from: './src/assets/fonts',
