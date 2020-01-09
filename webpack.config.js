@@ -1,6 +1,24 @@
 const path = require('path');
+const fs = require('fs');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
+
+function generateHtmlPlugins(templateDir) {
+    const templateFiles = fs.readdirSync(path.resolve(__dirname, templateDir));
+
+    return templateFiles.map(item => {
+        const parts = item.split('.');
+        const fileName = parts[0];
+        const fileExt = parts[1];
+
+        return new HtmlWebpackPlugin({
+            filename: `${fileName}.html`,
+            template: path.resolve(__dirname, `${templateDir}/${fileName}.${fileExt}`)
+        });
+    });
+}
+
+const htmlPlugins = generateHtmlPlugins('./src/pages');
 
 module.exports = {
     entry: ['./src/index.js'],
@@ -34,7 +52,6 @@ module.exports = {
                         options: {
                             modules: true,
                             importLoaders: 1,
-                            localIdentName: '[name]__[local]__[hash:base64:5]',
                         },
                     },
                     {
@@ -51,9 +68,6 @@ module.exports = {
         ]
     },
     plugins: [
-        new HtmlWebpackPlugin({
-            template: './src/pages/index.pug',
-        }),
         new CopyWebpackPlugin([
             {
                 from: './src/assets/fonts',
@@ -68,5 +82,5 @@ module.exports = {
                 to: './assets/images'
             }
         ]),
-    ]
+    ].concat(htmlPlugins)
 };
